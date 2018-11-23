@@ -1,0 +1,42 @@
+# Any line followed by a '#' character is ignored
+# Section headings must be in square brackets
+# Subsections within a section should follow the format:
+#   [filename within code directory][tab character \t][subsection title]
+
+[Advanced Data Structures Without Libraries]
+UnionFindDisjointSet.cpp	Union Find Disjoint Set
+SegmentTree.cpp	Segment Tree
+FenwickTree.cpp	Fenwick Tree/Binary Indexed Tree
+
+[Problem Solving Paradigms]
+Max1D2DRangeSum.cpp	Maximum 1D/2D Range Sum
+LongestIncreasingSubsequence.cpp	Longest Increasing Subsequence
+ZeroOneKnapsack.cpp	0/1 Knapsack
+CoinChange.cpp	Coin Change
+TravelingSalesmanProblem.cpp	Traveling Salesman Problem
+
+[Graphs]
+DepthFirstSearch.cpp	Depth First Search
+BreadthFirstSearch.cpp	Breadth First Search
+ConnectedComponents.cpp	Connected Components
+FloodFill.cpp	Flood Fill
+BipartiteGraphCheck.cpp	Bipartite Graph Check
+EdgePropertyCheck.cpp	Edge Property Check
+ArticulationPointsAndBridges.cpp	Finding Articulation Points And Bridges
+StronglyConnectedComponents.cpp	Finding Strongly Connected Components
+KruskalsMST.cpp	Minimum Spanning Tree Using Kruskal's Algorithm
+PrimsMST.cpp	Minimum Spanning Tree Using Prim's Algorithm
+DijkstrasSSSP.cpp	Single Source Shortest Path using Dijkstra's Algorithm
+FloydWarshall.cpp	All Pairs Shortest Path using Floyd Warshall's Algorithm
+EdmondsKarp.cpp	Max Flow with Edmonds Karp Algorithm
+DinicsMaxFlow.cpp	Max Flow with Dinic's Algorithm
+
+[Combinatorics]
+
+[Number Theory]
+
+[Miscellaneous Mathematics]
+
+[String Processing]
+
+[Computational Geometry]

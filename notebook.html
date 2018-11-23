@@ -1,0 +1,813 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<HTML>
+<HEAD>
+<TITLE>De La Salle University ACM-ICPC Team Notebook</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#1F00FF" ALINK="#FF0000" VLINK="#9900DD">
+<A NAME="top">
+<CENTER><H1><U>De La Salle University ACM-ICPC Team Notebook</U></H1></CENTER>
+<H1>Table of Contents</H1>
+<H2>Advanced Data Structures Without Libraries</H2>
+
+<OL START=1>
+<LI><A HREF="#file1">Union Find Disjoint Set</A></LI>
+<LI><A HREF="#file2">Segment Tree</A></LI>
+<LI><A HREF="#file3">Fenwick Tree/Binary Indexed Tree</A></LI>
+</OL>
+<H2>Problem Solving Paradigms</H2>
+
+<OL START=4>
+<LI><A HREF="#file4">Maximum 1D/2D Range Sum</A></LI>
+<LI><A HREF="#file5">Longest Increasing Subsequence</A></LI>
+<LI><A HREF="#file6">0/1 Knapsack</A></LI>
+<LI><A HREF="#file7">Coin Change</A></LI>
+<LI><A HREF="#file8">Traveling Salesman Problem</A></LI>
+</OL>
+<H2>Graphs</H2>
+
+<OL START=9>
+<LI><A HREF="#file9">Depth First Search</A></LI>
+<LI><A HREF="#file10">Breadth First Search</A></LI>
+<LI><A HREF="#file11">Connected Components</A></LI>
+<LI><A HREF="#file12">Flood Fill</A></LI>
+<LI><A HREF="#file13">Bipartite Graph Check</A></LI>
+<LI><A HREF="#file14">Edge Property Check</A></LI>
+<LI><A HREF="#file15">Finding Articulation Points And Bridges</A></LI>
+<LI><A HREF="#file16">Finding Strongly Connected Components</A></LI>
+</OL>
+<H2>Combinatorics</H2>
+
+<OL START=17>
+</OL>
+<H2>Number Theory</H2>
+
+<OL START=17>
+</OL>
+<H2>Miscellaneous Mathematics</H2>
+
+<OL START=17>
+</OL>
+<H2>String Processing</H2>
+
+<OL START=17>
+</OL>
+<H2>Computational Geometry</H2>
+
+<OL START=17>
+</OL>
+<HR>
+<A NAME="file1">
+<H1>code\UnionFindDisjointSet.cpp 1/16</H1>
+[<A HREF="#top">top</A>][prev][<A HREF="#file2">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+
+using namespace std;
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+
+<B><FONT COLOR="#228B22">class</FONT></B> UnionFind {
+	<B><FONT COLOR="#228B22">public</FONT></B>:
+	vi p, rank;
+	UnionFind(<B><FONT COLOR="#228B22">int</FONT></B> n) {
+		p.assign(n,0);
+		rank.assign(n,0);
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; n; i++) { p[i] = i; }
+	}
+
+	<B><FONT COLOR="#228B22">void</FONT></B> unionSet(<B><FONT COLOR="#228B22">int</FONT></B> i, <B><FONT COLOR="#228B22">int</FONT></B> j) {
+		<B><FONT COLOR="#A020F0">if</FONT></B>(!isSameSet(i,j)) {
+			<B><FONT COLOR="#228B22">int</FONT></B> x = findSet(i), y = findSet(j);
+			<B><FONT COLOR="#A020F0">if</FONT></B>(rank[x] &gt; rank[y]) {
+				p[y] = x;
+			} <B><FONT COLOR="#A020F0">else</FONT></B> {
+				p[x] = y;
+				<B><FONT COLOR="#A020F0">if</FONT></B>(rank[x] == rank[y]) { rank[y]++; }
+			}
+		}
+	}
+
+	<B><FONT COLOR="#228B22">int</FONT></B> findSet(<B><FONT COLOR="#228B22">int</FONT></B> i) {
+		<B><FONT COLOR="#A020F0">if</FONT></B>(p[i] != i) {
+			p[i] = findSet(p[i]);
+		}
+		<B><FONT COLOR="#A020F0">return</FONT></B> p[i];
+	}
+
+	<B><FONT COLOR="#228B22">bool</FONT></B> isSameSet(<B><FONT COLOR="#228B22">int</FONT></B> i, <B><FONT COLOR="#228B22">int</FONT></B> j) { <B><FONT COLOR="#A020F0">return</FONT></B> findSet(i) == findSet(j);}
+};</PRE>
+<HR>
+<A NAME="file2">
+<H1>code\SegmentTree.cpp 2/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file1">prev</A>][<A HREF="#file3">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+
+using namespace std;
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+
+<I><FONT COLOR="#B22222">/**
+ * Segment tree for Range Maximum Queries
+ */</FONT></I>
+<B><FONT COLOR="#228B22">class</FONT></B> SegmentTree {
+	<B><FONT COLOR="#228B22">public</FONT></B>:
+	vi st, A;
+	<B><FONT COLOR="#228B22">int</FONT></B> n;
+	SegmentTree(<B><FONT COLOR="#228B22">const</FONT></B> vi &amp;_A) {
+		A = _A;
+		n = (<B><FONT COLOR="#228B22">int</FONT></B>)A.size();
+		st.assign(4 * n, 0);
+		build(1, 0, n - 1);
+	}
+
+	<B><FONT COLOR="#228B22">int</FONT></B> left(<B><FONT COLOR="#228B22">int</FONT></B> p) { <B><FONT COLOR="#A020F0">return</FONT></B> 1 &lt;&lt; p; }
+	<B><FONT COLOR="#228B22">int</FONT></B> right(<B><FONT COLOR="#228B22">int</FONT></B> p) { <B><FONT COLOR="#A020F0">return</FONT></B> (1 &lt;&lt; p) + 1; }
+	<B><FONT COLOR="#228B22">void</FONT></B> build(<B><FONT COLOR="#228B22">int</FONT></B> p, <B><FONT COLOR="#228B22">int</FONT></B> l, <B><FONT COLOR="#228B22">int</FONT></B> r) {
+		<B><FONT COLOR="#A020F0">if</FONT></B>(l == r) {
+			st[p] = l;
+		} <B><FONT COLOR="#A020F0">else</FONT></B> {
+			<B><FONT COLOR="#228B22">int</FONT></B> m = l + (r - l) / 2;
+			build(left(p),1,m);
+			build(right(p),m + 1,r);
+			<B><FONT COLOR="#228B22">int</FONT></B> l = st[left(p)];
+			<B><FONT COLOR="#228B22">int</FONT></B> r = st[right(p)];
+			st[p] = A[l] &gt;= A[r] ? l : r;
+		}
+	}
+	<B><FONT COLOR="#228B22">int</FONT></B> rmq(<B><FONT COLOR="#228B22">int</FONT></B> i, <B><FONT COLOR="#228B22">int</FONT></B> j) {
+		<B><FONT COLOR="#A020F0">return</FONT></B> rmq(1,0,n-1,i,j);
+	}
+	<B><FONT COLOR="#228B22">int</FONT></B> rmq(<B><FONT COLOR="#228B22">int</FONT></B> p, <B><FONT COLOR="#228B22">int</FONT></B> l, <B><FONT COLOR="#228B22">int</FONT></B> r, <B><FONT COLOR="#228B22">int</FONT></B> i, <B><FONT COLOR="#228B22">int</FONT></B> j) {
+		<B><FONT COLOR="#A020F0">if</FONT></B>(l &gt; j || r &lt; i) { <B><FONT COLOR="#A020F0">return</FONT></B> -1; }
+		<B><FONT COLOR="#A020F0">else</FONT></B> <B><FONT COLOR="#A020F0">if</FONT></B>(l &gt;= i &amp;&amp; r &lt;= j) { <B><FONT COLOR="#A020F0">return</FONT></B> st[p]; } 
+		<B><FONT COLOR="#A020F0">else</FONT></B> {
+			<B><FONT COLOR="#228B22">int</FONT></B> m = l + (r - l) / 2;
+			<B><FONT COLOR="#228B22">int</FONT></B> s1 = rmq(left(p),l,m,i,j);
+			<B><FONT COLOR="#228B22">int</FONT></B> s2 = rmq(right(p),m + 1,r,i,j);
+			<B><FONT COLOR="#A020F0">if</FONT></B>(s1 == -1) {<B><FONT COLOR="#A020F0">return</FONT></B> s2;}
+			<B><FONT COLOR="#A020F0">else</FONT></B> <B><FONT COLOR="#A020F0">if</FONT></B>(s2 == -1) {<B><FONT COLOR="#A020F0">return</FONT></B> s1;}
+			<B><FONT COLOR="#A020F0">else</FONT></B> {<B><FONT COLOR="#A020F0">return</FONT></B> A[l] &gt;= A[r] ? l : r; }
+		}
+	}
+	<B><FONT COLOR="#228B22">void</FONT></B> pointUpdate(<B><FONT COLOR="#228B22">int</FONT></B> i, <B><FONT COLOR="#228B22">int</FONT></B> val) {
+		pointUpdate(1,0,n-1,i,val);
+	}
+	<B><FONT COLOR="#228B22">void</FONT></B> pointUpdate(<B><FONT COLOR="#228B22">int</FONT></B> p, <B><FONT COLOR="#228B22">int</FONT></B> l, <B><FONT COLOR="#228B22">int</FONT></B> r,<B><FONT COLOR="#228B22">int</FONT></B> i, <B><FONT COLOR="#228B22">int</FONT></B> val) {
+		<B><FONT COLOR="#A020F0">if</FONT></B>(l == r) {
+			A[i] = val;
+		} <B><FONT COLOR="#A020F0">else</FONT></B> {
+			<B><FONT COLOR="#228B22">int</FONT></B> m = l + (r - l) / 2;
+			<B><FONT COLOR="#A020F0">if</FONT></B>(i &gt;= l &amp;&amp; i &lt;= m) {
+				pointUpdate(left(p),1,m,i,val);
+			} <B><FONT COLOR="#A020F0">else</FONT></B> {
+				pointUpdate(right(p),m + 1,r,i,val);
+			}
+			<B><FONT COLOR="#228B22">int</FONT></B> l = st[left(p)];
+			<B><FONT COLOR="#228B22">int</FONT></B> r = st[right(p)];
+			st[p] = A[l] &gt;= A[r] ? l : r;
+		}
+	}
+};</PRE>
+<HR>
+<A NAME="file3">
+<H1>code\FenwickTree.cpp 3/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file2">prev</A>][<A HREF="#file4">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+
+using namespace std;
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+
+<B><FONT COLOR="#228B22">class</FONT></B> FenwickTree {
+	<B><FONT COLOR="#228B22">public</FONT></B>:
+	vi ft;
+	<B><FONT COLOR="#228B22">int</FONT></B> n;
+	FenwickTree(<B><FONT COLOR="#228B22">int</FONT></B> _n) {
+		n = _n;
+		ft.assign(n + 1,0);
+	}
+
+	<B><FONT COLOR="#228B22">void</FONT></B> update(<B><FONT COLOR="#228B22">int</FONT></B> index, <B><FONT COLOR="#228B22">int</FONT></B> increment) {
+		<B><FONT COLOR="#A020F0">while</FONT></B>(index &lt;= n) {
+			ft[index] += increment;
+			index += (index &amp; (-index));
+		}
+	}
+
+	<B><FONT COLOR="#228B22">int</FONT></B> rmq(<B><FONT COLOR="#228B22">int</FONT></B> end) {
+		<B><FONT COLOR="#228B22">int</FONT></B> res = 0;
+		<B><FONT COLOR="#A020F0">while</FONT></B>(end) {
+			res += ft[end];
+			end -= (end &amp; (-end));
+		}
+		<B><FONT COLOR="#A020F0">return</FONT></B> res;
+	}
+
+	<B><FONT COLOR="#228B22">int</FONT></B> rmq(<B><FONT COLOR="#228B22">int</FONT></B> i, <B><FONT COLOR="#228B22">int</FONT></B> j) {
+		<B><FONT COLOR="#A020F0">if</FONT></B>(i &gt; j) { <B><FONT COLOR="#A020F0">return</FONT></B> 0; }
+		<B><FONT COLOR="#A020F0">else</FONT></B> <B><FONT COLOR="#A020F0">if</FONT></B>(i &lt;= 0) { <B><FONT COLOR="#A020F0">return</FONT></B> rmq(j); }
+		<B><FONT COLOR="#A020F0">else</FONT></B> {<B><FONT COLOR="#A020F0">return</FONT></B> rmq(j) - rmq(i - 1)}
+	}
+};</PRE>
+<HR>
+<A NAME="file4">
+<H1>code\Max1D2DRangeSum.cpp 4/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file3">prev</A>][<A HREF="#file5">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+
+using namespace std;
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">max1DRangeSum</FONT></B>(<B><FONT COLOR="#228B22">const</FONT></B> vi &amp;arr) {
+	<B><FONT COLOR="#228B22">int</FONT></B> ans = 0;
+	<B><FONT COLOR="#228B22">int</FONT></B> cur = 0;
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)arr.size(); i++) {
+		cur += arr[i];
+		<B><FONT COLOR="#A020F0">if</FONT></B>(cur &lt; 0) cur = 0; 
+		ans = max(ans,cur);
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> ans;
+}
+
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">max2DRangeSum</FONT></B>(<B><FONT COLOR="#228B22">const</FONT></B> vector&lt;vi&gt; &amp;arr) {
+	vi rowSums(arr.size(),0);
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)arr.size(); i++) {
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> j = 0; j &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)arr[i].size(); j++) {
+			rowSums[i] += arr[i][j];
+		}
+	}
+
+	<B><FONT COLOR="#228B22">int</FONT></B> ans = 0;
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> leftCol = 0; leftCol &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)arr[0].size(); leftCol++) {
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> rightCol = leftCol; rightCol &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)arr[0].size(); rightCol++) {
+			vi arr2(arr.size(),0);
+			<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)arr.size(); i++) {
+				arr2[i] = leftCol == 0 ? rowSums[rightCol] : 
+									(rowSums[rightCol] - rowSums[leftCol - 1]);
+			}
+			<B><FONT COLOR="#228B22">int</FONT></B> temp = max1DRangeSum(arr2);
+			ans = max(ans,temp);
+		}
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> ans;
+}</PRE>
+<HR>
+<A NAME="file5">
+<H1>code\LongestIncreasingSubsequence.cpp 5/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file4">prev</A>][<A HREF="#file6">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;algorithm&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+
+using namespace std;
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">lisSlow</FONT></B>(<B><FONT COLOR="#228B22">const</FONT></B> vi &amp;arr) {
+	vi memo(arr.size(),1);
+	<B><FONT COLOR="#228B22">int</FONT></B> ans = 1;
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 1; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)arr.size(); i++) {
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> j = 0; j &lt; i; j++) {
+			<B><FONT COLOR="#A020F0">if</FONT></B>(arr[i] &gt; arr[j]) {
+				memo[i] = max(memo[i],memo[j] + 1);
+			}
+		}
+		ans = max(ans,memo[i]);
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> ans;
+}
+
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">lisNLogN</FONT></B>(<B><FONT COLOR="#228B22">const</FONT></B> vi &amp;arr) {
+	vi memo;
+
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)arr.size(); i++) {
+		<B><FONT COLOR="#5F9EA0">vi</FONT></B>::iterator itr = lower_bound(memo.begin(),memo.end(),arr[i]);
+		<B><FONT COLOR="#A020F0">if</FONT></B>(itr == memo.end()) {
+			memo.push_back(arr[i]);
+		} <B><FONT COLOR="#A020F0">else</FONT></B> {
+			*itr = arr[i];
+		}
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> (<B><FONT COLOR="#228B22">int</FONT></B>)memo.size();
+}</PRE>
+<HR>
+<A NAME="file6">
+<H1>code\ZeroOneKnapsack.cpp 6/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file5">prev</A>][<A HREF="#file7">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+
+using namespace std;
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> pair&lt;<B><FONT COLOR="#228B22">int</FONT></B>,<B><FONT COLOR="#228B22">int</FONT></B>&gt; ii;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;ii&gt; vii;
+
+<I><FONT COLOR="#B22222">/**
+ * item.first - weight of item
+ * item.second - value of item
+ */</FONT></I>
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">zeroOneKnapsack</FONT></B>(<B><FONT COLOR="#228B22">const</FONT></B> vii &amp;items, <B><FONT COLOR="#228B22">int</FONT></B> maxWeight) {
+	vector&lt;vi&gt; memo(items.size(),vi(maxWeight + 1,0));
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)items.size(); i++ ) {
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> j = 0; j &lt;= maxWeight; j++) {
+			<B><FONT COLOR="#A020F0">if</FONT></B>(i == 0){
+				memo[i][j] = j &gt;= items[0].first ? items[0].second : 0;
+			} <B><FONT COLOR="#A020F0">else</FONT></B> {
+				memo[i][j] = memo[i - 1][j];
+				<B><FONT COLOR="#A020F0">if</FONT></B>(j &gt;= items[i].first) {
+					memo[i][j] = max(memo[i][j],memo[i - 1][j - items[i].first] 
+												+ items[i].second);
+				}
+			}
+		}
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> memo[(<B><FONT COLOR="#228B22">int</FONT></B>)items.size() - 1][maxWeight];
+}</PRE>
+<HR>
+<A NAME="file7">
+<H1>code\CoinChange.cpp 7/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file6">prev</A>][<A HREF="#file8">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+
+using namespace std;
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> pair&lt;<B><FONT COLOR="#228B22">int</FONT></B>,<B><FONT COLOR="#228B22">int</FONT></B>&gt; ii;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+
+<I><FONT COLOR="#B22222">/**
+ * returns minimum coins
+ */</FONT></I>
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">coinChangeV1</FONT></B>(<B><FONT COLOR="#228B22">const</FONT></B> vi &amp;denoms, <B><FONT COLOR="#228B22">int</FONT></B> total) {
+	vi memo(total + 1,1 &lt;&lt; 29);
+	memo[0] = 0;
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 1; i &lt;= total; i++) {
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> j = 0; j &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)denoms.size(); j++) {
+			<B><FONT COLOR="#A020F0">if</FONT></B>(i - denoms[j] &gt;= 0) {
+				memo[i] = min(memo[i],memo[i - denoms[j]] + 1);
+			}	
+		}
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> memo[total];
+}
+
+<I><FONT COLOR="#B22222">/**
+ * returns number of ways to give change
+ */</FONT></I>
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">coinChangeV2</FONT></B>(<B><FONT COLOR="#228B22">const</FONT></B> vi &amp;denoms, <B><FONT COLOR="#228B22">int</FONT></B> total) {
+	vector&lt;vi&gt; memo(denoms.size(),vi(total + 1,0));
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)denoms.size(); i++) {
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> j = 0; j &lt;= total; j++) {
+			<B><FONT COLOR="#A020F0">if</FONT></B>(i == 0) {
+				memo[i][j] = j % denoms[0] ? 1 : 0;
+			} <B><FONT COLOR="#A020F0">else</FONT></B> {
+				memo[i][j] = 0;
+				<B><FONT COLOR="#228B22">int</FONT></B> count = 0;
+				<B><FONT COLOR="#A020F0">while</FONT></B>(j - count * denoms[i] &gt;= 0) {
+					memo[i][j] += memo[i - 1][j - count * denoms[i]];
+					count++;
+				}
+			}
+		}
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> memo[(<B><FONT COLOR="#228B22">int</FONT></B>)denoms.size() - 1][total];
+}</PRE>
+<HR>
+<A NAME="file8">
+<H1>code\TravelingSalesmanProblem.cpp 8/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file7">prev</A>][<A HREF="#file9">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+
+using namespace std;
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+
+<B><FONT COLOR="#228B22">int</FONT></B> n; <I><FONT COLOR="#B22222">// number of nodes
+</FONT></I><B><FONT COLOR="#228B22">int</FONT></B> start; <I><FONT COLOR="#B22222">//start node
+</FONT></I>
+vector&lt;vi&gt; memo(n,vi(1 &lt;&lt; n, -1));
+vector&lt;vi&gt; dists; <I><FONT COLOR="#B22222">// 2D distance matrix
+</FONT></I>
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">tsp</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> pos, <B><FONT COLOR="#228B22">int</FONT></B> mask) {
+	<B><FONT COLOR="#A020F0">if</FONT></B>(mask == (1 &lt;&lt; n) - 1) {
+		<B><FONT COLOR="#A020F0">return</FONT></B> dists[pos][start];
+	} <B><FONT COLOR="#A020F0">else</FONT></B> <B><FONT COLOR="#A020F0">if</FONT></B>(memo[pos][mask] != -1) {
+		<B><FONT COLOR="#A020F0">return</FONT></B> memo[pos][mask];
+	} <B><FONT COLOR="#A020F0">else</FONT></B> {
+		<B><FONT COLOR="#228B22">int</FONT></B> &amp;res = memo[pos][mask];
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; n; i++) {
+			<B><FONT COLOR="#A020F0">if</FONT></B>((mask &amp; (1 &lt;&lt; i)) == 0) {
+				res = min(res,dists[pos][i] + tsp(i,mask | (1 &lt;&lt; i)));
+			}
+		}
+		<B><FONT COLOR="#A020F0">return</FONT></B> res;
+	}
+}</PRE>
+<HR>
+<A NAME="file9">
+<H1>code\DepthFirstSearch.cpp 9/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file8">prev</A>][<A HREF="#file10">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;utility&gt;</FONT></B>
+
+using namespace std;
+
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">UNVISITED</FONT> 1
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">VISITED</FONT> 2
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> pair&lt;<B><FONT COLOR="#228B22">int</FONT></B>,<B><FONT COLOR="#228B22">int</FONT></B>&gt; ii;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;ii&gt; vii;
+
+vector&lt;vii&gt; adjList;
+vi dfs_num;
+
+<B><FONT COLOR="#228B22">void</FONT></B> <B><FONT COLOR="#0000FF">dfs</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> u){
+	dfs_num[u] = VISITED;
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)adjList[u].size(); i++) {
+		ii v = adjList[u][i];
+		<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[v.first] == UNVISITED) {
+			dfs(v.first);
+		}
+	}
+}
+
+</PRE>
+<HR>
+<A NAME="file10">
+<H1>code\BreadthFirstSearch.cpp 10/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file9">prev</A>][<A HREF="#file11">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;utility&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;queue&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;bitset&gt;</FONT></B>
+
+using namespace std;
+
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">MAX_N</FONT> 1000
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> pair&lt;<B><FONT COLOR="#228B22">int</FONT></B>,<B><FONT COLOR="#228B22">int</FONT></B>&gt; ii;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;ii&gt; vii;
+
+vector&lt;vii&gt; adjList;
+
+<B><FONT COLOR="#228B22">void</FONT></B> <B><FONT COLOR="#0000FF">bfs</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> s){
+	bitset&lt;MAX_N&gt; visited;
+	queue&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; q;
+	q.push(s);
+	visited.set(s);
+	<B><FONT COLOR="#A020F0">while</FONT></B>(!q.empty()) {
+		<B><FONT COLOR="#228B22">int</FONT></B> u = q.front(); q.pop();
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)adjList[u].size(); i++) {
+			ii v = adjList[u][i];
+			<B><FONT COLOR="#A020F0">if</FONT></B>(!visited.test(v.first)) {
+				visited.set(v.first);
+				q.push(v.first);
+			} 
+		}
+	}
+}
+
+</PRE>
+<HR>
+<A NAME="file11">
+<H1>code\ConnectedComponents.cpp 11/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file10">prev</A>][<A HREF="#file12">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;utility&gt;</FONT></B>
+
+using namespace std;
+
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">UNVISITED</FONT> 1
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">VISITED</FONT> 2
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> pair&lt;<B><FONT COLOR="#228B22">int</FONT></B>,<B><FONT COLOR="#228B22">int</FONT></B>&gt; ii;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;ii&gt; vii;
+
+vector&lt;vii&gt; adjList;
+vi dfs_num;
+<B><FONT COLOR="#228B22">int</FONT></B> V;
+
+<B><FONT COLOR="#228B22">void</FONT></B> <B><FONT COLOR="#0000FF">dfs</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> u){
+	dfs_num[u] = VISITED;
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)adjList[u].size(); i++) {
+		ii v = adjList[u][i];
+		<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[v.first] == UNVISITED) {
+			dfs(v.first);
+		}
+	}
+}
+
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">countCC</FONT></B>() {
+	<B><FONT COLOR="#228B22">int</FONT></B> cc = 0;
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; V; i++) {
+		<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[i] == UNVISITED ){
+			cc++;
+			dfs(i);
+		}
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> cc;
+}</PRE>
+<HR>
+<A NAME="file12">
+<H1>code\FloodFill.cpp 12/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file11">prev</A>][<A HREF="#file13">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;utility&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;queue&gt;</FONT></B>
+
+using namespace std;
+
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">MAX_R</FONT> 1000
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">MAX_C</FONT> 1000
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> pair&lt;<B><FONT COLOR="#228B22">int</FONT></B>,<B><FONT COLOR="#228B22">int</FONT></B>&gt; ii;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;ii&gt; vii;
+
+<B><FONT COLOR="#228B22">int</FONT></B> grid[MAX_R][MAX_C];
+<B><FONT COLOR="#228B22">int</FONT></B> dr[] = {-1,-1,-1,0,0,1,1,1};
+<B><FONT COLOR="#228B22">int</FONT></B> dc[] = {-1,0,1,-1,1,-1,0,1};
+
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">iterativeFloodFill</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> r, <B><FONT COLOR="#228B22">int</FONT></B> c, <B><FONT COLOR="#228B22">int</FONT></B> v1, <B><FONT COLOR="#228B22">int</FONT></B> v2){
+	<B><FONT COLOR="#A020F0">if</FONT></B>(r &gt;= 0 &amp;&amp; r &lt; MAX_R &amp;&amp; c &gt;= 0 &amp;&amp; c &lt; MAX_C &amp;&amp; grid[r][c] == v1) {
+		queue&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; q;
+		q.push(r * MAX_C + c);
+		<B><FONT COLOR="#228B22">int</FONT></B> area = 0;
+		<B><FONT COLOR="#A020F0">while</FONT></B>(!q.empty()) {
+			<B><FONT COLOR="#228B22">int</FONT></B> u = q.front(); q.pop();
+			<B><FONT COLOR="#228B22">int</FONT></B> inR = u / MAX_C;
+			<B><FONT COLOR="#228B22">int</FONT></B> inC = u % MAX_C;
+			grid[inR][inC] = v2;
+			area++;
+			<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; 4; i++) {
+				<B><FONT COLOR="#228B22">int</FONT></B> nr = inR + dr[i];
+				<B><FONT COLOR="#228B22">int</FONT></B> nc = inC + dc[i];
+				<B><FONT COLOR="#A020F0">if</FONT></B>(nr &gt;= 0 &amp;&amp; nr &lt; MAX_R &amp;&amp; nc &gt;= 0 &amp;&amp; nc &lt; MAX_C &amp;&amp; 
+					grid[nr][nc] == v1) {
+					q.push(nr * MAX_C + nc);
+				}
+			}
+		}
+		<B><FONT COLOR="#A020F0">return</FONT></B> area;
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> 0;
+}
+
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">recursiveFloodFill</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> r, <B><FONT COLOR="#228B22">int</FONT></B> c, <B><FONT COLOR="#228B22">int</FONT></B> v1, <B><FONT COLOR="#228B22">int</FONT></B> v2) {
+	<B><FONT COLOR="#A020F0">if</FONT></B>(r &gt;= 0 &amp;&amp; r &lt; MAX_R &amp;&amp; c &gt;= 0 &amp;&amp; c &lt; MAX_C &amp;&amp; grid[r][c] == v1) {
+		grid[r][c] = v2;
+		<B><FONT COLOR="#228B22">int</FONT></B> area = 1;
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; 4; i++) {
+			<B><FONT COLOR="#228B22">int</FONT></B> nr = r + dr[i];
+			<B><FONT COLOR="#228B22">int</FONT></B> nc = c + dc[i];
+			area += recursiveFloodFill(nr,nc,v1,v2);
+		}
+		<B><FONT COLOR="#A020F0">return</FONT></B> area;
+	} <B><FONT COLOR="#A020F0">else</FONT></B> {
+		<B><FONT COLOR="#A020F0">return</FONT></B> 0;
+	}
+}</PRE>
+<HR>
+<A NAME="file13">
+<H1>code\BipartiteGraphCheck.cpp 13/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file12">prev</A>][<A HREF="#file14">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;utility&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;queue&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;bitset&gt;</FONT></B>
+
+using namespace std;
+
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">MAX_N</FONT> 1000
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">NO_COLOR</FONT> -1
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> pair&lt;<B><FONT COLOR="#228B22">int</FONT></B>,<B><FONT COLOR="#228B22">int</FONT></B>&gt; ii;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;ii&gt; vii;
+
+<B><FONT COLOR="#228B22">int</FONT></B> V;
+vector&lt;vii&gt; adjList;
+
+<B><FONT COLOR="#228B22">bool</FONT></B> <B><FONT COLOR="#0000FF">isBipartite</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> s){
+	queue&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; q;
+	q.push(s);
+	vi color(V,NO_COLOR);
+	color[s] = 0;
+	<B><FONT COLOR="#228B22">bool</FONT></B> isBipartite = true;
+	<B><FONT COLOR="#A020F0">while</FONT></B>(!q.empty() &amp;&amp; isBipartite) {
+		<B><FONT COLOR="#228B22">int</FONT></B> u = q.front(); q.pop();
+		<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)adjList[u].size(); i++) {
+			ii v = adjList[u][i];
+			<B><FONT COLOR="#A020F0">if</FONT></B>(color[v.first] == NO_COLOR) {
+				color[v.first] = 1 - color[u];
+				q.push(v.first);
+			} <B><FONT COLOR="#A020F0">else</FONT></B> <B><FONT COLOR="#A020F0">if</FONT></B>(color[v.first] == color[u]) {
+				isBipartite = false;
+			}
+		}
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> isBipartite;
+}
+
+</PRE>
+<HR>
+<A NAME="file14">
+<H1>code\EdgePropertyCheck.cpp 14/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file13">prev</A>][<A HREF="#file15">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;cstdio&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;utility&gt;</FONT></B>
+
+using namespace std;
+
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">UNVISITED</FONT> 1
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">VISITED</FONT> 2
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">EXPLORED</FONT> 3
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> pair&lt;<B><FONT COLOR="#228B22">int</FONT></B>,<B><FONT COLOR="#228B22">int</FONT></B>&gt; ii;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;ii&gt; vii;
+
+vector&lt;vii&gt; adjList;
+vi dfs_parent;
+vi dfs_num;
+
+<B><FONT COLOR="#228B22">void</FONT></B> <B><FONT COLOR="#0000FF">dfs</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> u){
+	dfs_num[u] = VISITED;
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)adjList[u].size(); i++) {
+		ii v = adjList[u][i];
+		<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[v.first] == UNVISITED) {
+			printf(<B><FONT COLOR="#BC8F8F">&quot;Edge (%d,%d): Tree Edge\n&quot;</FONT></B>,u,v.first);
+			dfs_parent[v.first] = u;
+			dfs(v.first);
+		} <B><FONT COLOR="#A020F0">else</FONT></B> <B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[v.first] == VISITED) {
+			<B><FONT COLOR="#A020F0">if</FONT></B>(v.first == dfs_parent[u]) {
+				printf(<B><FONT COLOR="#BC8F8F">&quot;Edge (%d,%d): Two-Way Edge\n&quot;</FONT></B>,u,v.first);
+			} <B><FONT COLOR="#A020F0">else</FONT></B> {
+				printf(<B><FONT COLOR="#BC8F8F">&quot;Edge (%d,%d): Back Edge\n&quot;</FONT></B>,u,v.first);
+			}
+		} <B><FONT COLOR="#A020F0">else</FONT></B> {
+			printf(<B><FONT COLOR="#BC8F8F">&quot;Edge (%d,%d): Forward/Cross Edge\n&quot;</FONT></B>,u,v.first);
+		}
+	}
+	dfs_num[u] = EXPLORED;
+}
+
+</PRE>
+<HR>
+<A NAME="file15">
+<H1>code\ArticulationPointsAndBridges.cpp 15/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file14">prev</A>][<A HREF="#file16">next</A>]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;utility&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;bitset&gt;</FONT></B>
+
+using namespace std;
+
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">MAX_N</FONT> 1000
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> pair&lt;<B><FONT COLOR="#228B22">int</FONT></B>,<B><FONT COLOR="#228B22">int</FONT></B>&gt; ii;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;ii&gt; vii;
+
+vector&lt;vii&gt; adjList;
+vi dfs_num, dfs_low, dfs_parent;
+bitset&lt;MAX_N&gt; isArticulationPoint;
+
+<B><FONT COLOR="#228B22">int</FONT></B> dfsCtr = 0, V, children, dfsRoot;
+
+<B><FONT COLOR="#228B22">void</FONT></B> <B><FONT COLOR="#0000FF">dfs</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> u,vii &amp;bridges){
+	dfs_num[u] = dfs_low[u] = dfsCtr++;
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)adjList[u].size(); i++) {
+		ii v = adjList[u][i];
+		<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[v.first] == -1) {
+			dfs_parent[v.first] = u;
+			dfs(v.first,bridges);
+			<B><FONT COLOR="#A020F0">if</FONT></B>(u == dfsRoot) {
+				children++;
+			}
+
+			dfs_low[u] = min(dfs_low[u],dfs_low[v.first]);
+			<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[u] &lt;= dfs_low[v.first]) {
+				isArticulationPoint.set(u);
+			}
+			<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[u] &lt; dfs_low[v.first]) {
+				bridges.push_back(ii(u,v.first));
+			}
+		} <B><FONT COLOR="#A020F0">else</FONT></B> <B><FONT COLOR="#A020F0">if</FONT></B>(v.first != dfs_parent[u]) {
+			dfs_low[u] = min(dfs_low[u],dfs_num[v.first]);
+		}
+	}
+}
+
+pair&lt;vi,vii&gt; findArticulationPointsAndBridges(){
+	vii bridges;
+	isArticulationPoint.reset();
+	dfs_num.assign(V,-1);
+	dfs_low.assign(V,-1);
+	dfs_parent.assign(V,-1);
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; V; i++) {
+		<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[i] == -1) {
+			children = 0;
+			dfsRoot = i;
+			dfs(i,bridges);
+			<B><FONT COLOR="#A020F0">if</FONT></B>(children &gt; 1) {
+				isArticulationPoint.set(i);
+			} <B><FONT COLOR="#A020F0">else</FONT></B> {
+				isArticulationPoint.reset(i);
+			}
+		}
+	}
+	vi artPoints;
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; V; i++) {
+		<B><FONT COLOR="#A020F0">if</FONT></B>(isArticulationPoint.test(i)) {
+			artPoints.push_back(i);
+		}
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> pair&lt;vi,vii&gt;(artPoints,bridges);
+}
+
+</PRE>
+<HR>
+<A NAME="file16">
+<H1>code\StronglyConnectedComponents.cpp 16/16</H1>
+[<A HREF="#top">top</A>][<A HREF="#file15">prev</A>][next]
+<PRE>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;vector&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;utility&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;bitset&gt;</FONT></B>
+#<B><FONT COLOR="#5F9EA0">include</FONT></B> <B><FONT COLOR="#BC8F8F">&lt;stack&gt;</FONT></B>
+
+using namespace std;
+
+#<B><FONT COLOR="#5F9EA0">define</FONT></B> <FONT COLOR="#B8860B">MAX_N</FONT> 1000
+
+<B><FONT COLOR="#228B22">typedef</FONT></B> pair&lt;<B><FONT COLOR="#228B22">int</FONT></B>,<B><FONT COLOR="#228B22">int</FONT></B>&gt; ii;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; vi;
+<B><FONT COLOR="#228B22">typedef</FONT></B> vector&lt;ii&gt; vii;
+
+vector&lt;vii&gt; adjList;
+vi dfs_num, dfs_low;
+bitset&lt;MAX_N&gt; visited;
+
+<B><FONT COLOR="#228B22">int</FONT></B> dfsCtr = 0, V, scc;
+
+<B><FONT COLOR="#228B22">void</FONT></B> <B><FONT COLOR="#0000FF">tarjan</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> u,stack&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; &amp;s){
+	<I><FONT COLOR="#B22222">// printf(&quot;Tarjan(%d)\n&quot;,u);
+</FONT></I>	dfs_num[u] = dfs_low[u] = dfsCtr++;
+	s.push(u);
+	visited.set(u);
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; (<B><FONT COLOR="#228B22">int</FONT></B>)adjList[u].size(); i++) {
+		ii v = adjList[u][i];
+		<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[v.first] == -1) {
+			tarjan(v.first,s);
+		}
+		<B><FONT COLOR="#A020F0">if</FONT></B>(visited.test(u)) {
+			dfs_low[u] = min(dfs_low[u],dfs_low[v.first]);
+		}
+	}
+	<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_low[u] == dfs_num[u]) {
+		printf(<B><FONT COLOR="#BC8F8F">&quot;SCC #%d:&quot;</FONT></B>,++scc);
+		<B><FONT COLOR="#A020F0">while</FONT></B>(s.top() != u) {
+			<B><FONT COLOR="#228B22">int</FONT></B> temp = s.top();	s.pop();
+			printf(<B><FONT COLOR="#BC8F8F">&quot; %d&quot;</FONT></B>,temp);
+		}
+		printf(<B><FONT COLOR="#BC8F8F">&quot; %d\n&quot;</FONT></B>,s.top());
+		s.pop();
+	}
+}
+
+<B><FONT COLOR="#228B22">int</FONT></B> <B><FONT COLOR="#0000FF">printAndCountSCCs</FONT></B>(){
+	scc = 0;
+	visited.reset();
+	stack&lt;<B><FONT COLOR="#228B22">int</FONT></B>&gt; s;
+	dfs_num.assign(V,-1);
+	dfs_low.assign(V,-1);
+	<B><FONT COLOR="#A020F0">for</FONT></B>(<B><FONT COLOR="#228B22">int</FONT></B> i = 0; i &lt; V; i++) {
+		<I><FONT COLOR="#B22222">// printf(&quot;dfs_num[%d] = %d\n&quot;,i,dfs_num[i]);
+</FONT></I>		<B><FONT COLOR="#A020F0">if</FONT></B>(dfs_num[i] == -1) {
+			tarjan(i,s);
+		}
+	}
+	<B><FONT COLOR="#A020F0">return</FONT></B> scc;
+}</PRE>
+<HR>
+<ADDRESS>Generated by <A HREF="http://www.iki.fi/~mtr/genscript/">GNU enscript 1.6.3</A>.</ADDRESS>
+</BODY>
+</HTML>
