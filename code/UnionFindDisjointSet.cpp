@@ -6,10 +6,11 @@ typedef vector<int> vi;
 
 class UnionFind {
 	public:
-	vi p, rank;
+	vi p, rank, size;
 	UnionFind(int n) {
 		p.assign(n,0);
 		rank.assign(n,0);
+		size.assign(n,1);
 		for(int i = 0; i < n; i++) { p[i] = i; }
 	}
 
@@ -22,6 +23,8 @@ class UnionFind {
 				p[x] = y;
 				if(rank[x] == rank[y]) { rank[y]++; }
 			}
+			size[x]+=size[y];
+			size[y] = size[x];
 		}
 	}
 
