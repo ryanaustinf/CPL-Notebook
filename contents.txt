@@ -40,3 +40,6 @@ DinicsMaxFlow.cpp	Max Flow with Dinic's Algorithm
 [String Processing]
 
 [Computational Geometry]
+OneDum.cpp	One Dimensional Objects
+Circle.cpp	Circles
+Triangle.cpp	Triangles
