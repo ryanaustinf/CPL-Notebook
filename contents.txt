@@ -32,14 +32,17 @@ EdmondsKarp.cpp	Max Flow with Edmonds Karp Algorithm
 DinicsMaxFlow.cpp	Max Flow with Dinic's Algorithm
 
 [Combinatorics]
+Combinatorics.java	Combinatorics
 
 [Number Theory]
+NumberTheory.java	NumberTheory
 
 [Miscellaneous Mathematics]
 
 [String Processing]
+KMP.cpp	Knuth-Morris-Pratt Algorithm
 
 [Computational Geometry]
-OneDum.cpp	One Dimensional Objects
+OneDim.cpp	One Dimensional Objects
 Circle.cpp	Circles
 Triangle.cpp	Triangles
