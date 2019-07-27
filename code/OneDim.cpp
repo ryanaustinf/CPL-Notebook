@@ -92,6 +92,16 @@ class Vector {
 	double norm() const {
 		return x * x + y * y;
 	}
+
+
+	/**
+	 * if this returns positive value, v2 is counter clockwise from this vector
+	 * if 0, the two are scaled versions of each other
+	 * if negative, v2 is clockwise from this vector.
+	 */
+	double cross(const Vector &v2) const {
+		return x * v2.y - y * v2.x;
+	}
 };
 
 /**
@@ -102,4 +112,26 @@ double distToLine(Point p, Point a, Point b, Point &c) {
 	double u = ap.dot(ab) / ab.norm();
 	ab.scale(u).translate(a);
 	return p.dist(c);
+}
+
+/**
+ * distance of point p from line AB
+ */
+double distToLineSegment(Point p, Point a, Point b, Point &c) {
+	Vector ap = Vector(a,p), ab = Vector(a,b);
+	double u = ap.dot(ab) / ab.norm();
+	if(u < 0.0) {
+		c = Point(a.x,a.y);
+		return p.dist(a);
+	}
+	if(u > 1.0) {
+		c = Point(b.x,b.y);
+		return p.dist(b);
+	}
+	return distToLine(p,a,b,c);
+}
+
+double angle(Point a, Point o, Point b) {
+	Vector oa = Vector(o,a), ob = Vector(o,b);
+	return acos(oa.dot(ob) / sqrt(oa.norm() * ob.norm()));
 }

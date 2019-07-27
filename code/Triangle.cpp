@@ -1,5 +1,4 @@
 #include <cmath>
-#include "OneDim.cpp"
 
 /**
  * returns area of triangle with base b and height h.

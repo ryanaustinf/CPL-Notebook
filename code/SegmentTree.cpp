@@ -18,18 +18,18 @@ class SegmentTree {
 		build(1, 0, n - 1);
 	}
 
-	int left(int p) { return 1 << p; }
-	int right(int p) { return (1 << p) + 1; }
+	int left(int p) { return p << 1; }
+	int right(int p) { return (p << 1) + 1; }
 	void build(int p, int l, int r) {
 		if(l == r) {
 			st[p] = l;
 		} else {
 			int m = l + (r - l) / 2;
-			build(left(p),1,m);
+			build(left(p),l,m);
 			build(right(p),m + 1,r);
-			int l = st[left(p)];
-			int r = st[right(p)];
-			st[p] = A[l] >= A[r] ? l : r;
+			int s1 = st[left(p)];
+			int s2 = st[right(p)];
+			st[p] = A[s1] <= A[s2] ? s1 : s2;
 		}
 	}
 	int rmq(int i, int j) {
@@ -44,7 +44,7 @@ class SegmentTree {
 			int s2 = rmq(right(p),m + 1,r,i,j);
 			if(s1 == -1) {return s2;}
 			else if(s2 == -1) {return s1;}
-			else {return A[l] >= A[r] ? l : r; }
+			else {return A[s1] <= A[s2] ? s1 : s2; }
 		}
 	}
 	void pointUpdate(int i, int val) {
@@ -56,13 +56,13 @@ class SegmentTree {
 		} else {
 			int m = l + (r - l) / 2;
 			if(i >= l && i <= m) {
-				pointUpdate(left(p),1,m,i,val);
+				pointUpdate(left(p),l,m,i,val);
 			} else {
 				pointUpdate(right(p),m + 1,r,i,val);
 			}
-			int l = st[left(p)];
-			int r = st[right(p)];
-			st[p] = A[l] >= A[r] ? l : r;
+			int s1 = st[left(p)];
+			int s2 = st[right(p)];
+			st[p] = A[s1] <= A[s2] ? s1 : s2;
 		}
 	}
 };
